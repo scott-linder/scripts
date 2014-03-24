@@ -11,7 +11,7 @@ Usage: wp.sh [next|rand]
 EOL
 
 if [ -z $1 ]; then
-    echo $USAGE
+    echo "$USAGE"
     exit
 fi
 
@@ -19,28 +19,26 @@ fi
 IFS='
 '
 
-# Returns path to next wallpaper.
-next() {
-    # Attempt to retrieve our index
+# Returns path to nth next wallpaper.
+#   $1 how many wallpapers to move.
+incr() {
+    # Attempt to retrieve our index, or just default to 0
     if [ -e "${WP_DIR}index" ]; then
         index=$(cat "${WP_DIR}index")
     else
-        # if the file does not exist we'll start fresh
         index=0
     fi
 
     # Get array of all the possible images
     wallpapers=(`find -L $WP_DIR -type f -regex .*.[png,jpg,jpeg]`)
+    # We wrap on overflow/underflow
+    wallpaper_count=${#wallpapers[*]}
+    # Increment
+    index=$(( ($index + $1) % $wallpaper_count ))
+    # Remember index next time
+    echo $index > "${WP_DIR}index"
 
-    # Check for overflow and wrap back if we have
-    len=${#wallpapers[*]}
-    if [[ $index -ge $len ]]; then
-        index=0
-    fi
-
-    #Increment the index so we hit the next one upon next invocation
-    echo $(($index+1)) > "${WP_DIR}index"
-
+    # Return path to wallpaper
     echo ${wallpapers[$index]}
 }
 
@@ -53,7 +51,10 @@ rand() {
 
 case $1 in
     'next')
-        wp=$(next)
+        wp=$(incr 1)
+        ;;
+    'prev')
+        wp=$(incr -1)
         ;;
     'rand')
         wp=$(rand)
