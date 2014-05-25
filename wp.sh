@@ -6,9 +6,7 @@
 WP_DIR="/home/scott/images/wallpaper/rotation/"
 
 
-USAGE=<<EOL
-Usage: wp.sh [next|rand]
-EOL
+USAGE="Usage: wp.sh [next|prev|rand]"
 
 if [ -z $1 ]; then
     echo "$USAGE"
